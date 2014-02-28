@@ -53,6 +53,10 @@ func (c *Client) processMessage(msg *Message) {
 	}
 }
 
+func (c *Client) Disconnect() error {
+	return c.conn.Close()
+}
+
 func (c *Client) Channel(name string) *Channel {
 	for _, channel := range c.channels {
 		if channel.Name == name {
