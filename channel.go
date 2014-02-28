@@ -1,9 +1,22 @@
 package pusher
 
 type Channel struct {
-	name string
+	Name  string
+	binds map[string][]chan *Message
+}
+
+func NewChannel(name string) *Channel {
+	return &Channel{name, make(map[string][]chan *Message)}
 }
 
 func (c *Channel) Bind(event string) chan *Message {
-	return nil
+	eventChan := make(chan *Message)
+	c.binds[event] = append(c.binds[event], eventChan)
+	return eventChan
+}
+
+func (c *Channel) processMessage(msg *Message) {
+	for _, eventChan := range c.binds[msg.Event] {
+		eventChan <- msg
+	}
 }
