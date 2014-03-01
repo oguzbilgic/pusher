@@ -19,7 +19,14 @@ func New(key string) (*Client, error) {
 		return nil, err
 	}
 
-	client := &Client{key, ws, nil}
+	client := &Client{
+		key:  key,
+		conn: ws,
+		channels: []*Channel{
+			NewChannel("pusher"),
+			NewChannel("pusher_internal"),
+		},
+	}
 
 	go client.poll()
 
@@ -39,18 +46,9 @@ func (c *Client) poll() {
 }
 
 func (c *Client) processMessage(msg *Message) {
-	switch msg.Event {
-	case "pusher:connection_established":
-		//println(msg.Data.(map[string]string)["socket_id"])
-	case "connection_established":
-		//println(msg.Data.(map[string]string)["socket_id"])
-	case "pusher:error":
-		//println(msg.Data.(map[string]interface{})["message"].(string))
-	default:
-		for _, channel := range c.channels {
-			if channel.Name == msg.Channel {
-				channel.processMessage(msg)
-			}
+	for _, channel := range c.channels {
+		if channel.Name == msg.Channel {
+			channel.processMessage(msg)
 		}
 	}
 }
