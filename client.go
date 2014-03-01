@@ -12,7 +12,7 @@ type Client struct {
 }
 
 func New(key string) (*Client, error) {
-	url := "ws://ws.pusherapp.com:80/app/" + key
+	url := "ws://ws.pusherapp.com:80/app/" + key + "?protocol=7"
 
 	ws, err := websocket.Dial(url, "", "http://localhost/")
 	if err != nil {
@@ -21,19 +21,21 @@ func New(key string) (*Client, error) {
 
 	client := &Client{key, ws, nil}
 
-	go func() {
-		for {
-			var msg Message
-			err := websocket.JSON.Receive(ws, &msg)
-			if err != nil {
-				panic(err)
-			}
-
-			client.processMessage(&msg)
-		}
-	}()
+	go client.poll()
 
 	return client, nil
+}
+
+func (c *Client) poll() {
+	for {
+		var msg Message
+		err := websocket.JSON.Receive(c.conn, &msg)
+		if err != nil {
+			panic(err)
+		}
+
+		c.processMessage(&msg)
+	}
 }
 
 func (c *Client) processMessage(msg *Message) {
