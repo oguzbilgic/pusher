@@ -9,3 +9,7 @@ type Message struct {
 func NewSubscribeMessage(channel string) *Message {
 	return &Message{"pusher:subscribe", "", map[string]string{"channel": channel}}
 }
+
+func NewPongMessage() *Message {
+	return &Message{"pusher:pong", "", nil}
+}

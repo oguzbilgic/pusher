@@ -3,6 +3,7 @@ package pusher
 
 import (
 	"code.google.com/p/go.net/websocket"
+	"time"
 )
 
 type Client struct {
@@ -23,10 +24,18 @@ func New(key string) (*Client, error) {
 		key:  key,
 		conn: ws,
 		channels: []*Channel{
-			NewChannel("pusher"),
-			NewChannel("pusher_internal"),
+			NewChannel(""),
 		},
 	}
+
+	go func() {
+		tick := time.Tick(time.Minute)
+		pong := NewPongMessage()
+		for {
+			<-tick
+			websocket.JSON.Send(client.conn, pong)
+		}
+	}()
 
 	go client.poll()
 
