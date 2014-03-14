@@ -3,7 +3,12 @@ package pusher
 
 import (
 	"code.google.com/p/go.net/websocket"
+	"fmt"
 	"time"
+)
+
+const (
+	pusherUrl = "ws://ws.pusherapp.com:80/app/%s?protocol=7"
 )
 
 type Client struct {
@@ -13,9 +18,7 @@ type Client struct {
 }
 
 func New(key string) (*Client, error) {
-	url := "ws://ws.pusherapp.com:80/app/" + key + "?protocol=7"
-
-	ws, err := websocket.Dial(url, "", "http://localhost/")
+	ws, err := websocket.Dial(fmt.Sprintf(pusherUrl, key), "", "http://localhost/")
 	if err != nil {
 		return nil, err
 	}
