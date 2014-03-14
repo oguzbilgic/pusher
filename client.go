@@ -28,18 +28,19 @@ func New(key string) (*Client, error) {
 		},
 	}
 
-	go func() {
-		tick := time.Tick(time.Minute)
-		pong := NewPongMessage()
-		for {
-			<-tick
-			websocket.JSON.Send(client.conn, pong)
-		}
-	}()
-
+	go client.pong()
 	go client.poll()
 
 	return client, nil
+}
+
+func (c *Client) pong() {
+	tick := time.Tick(time.Minute)
+	pong := NewPongMessage()
+	for {
+		<-tick
+		websocket.JSON.Send(c.conn, pong)
+	}
 }
 
 func (c *Client) poll() {
