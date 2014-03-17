@@ -11,19 +11,19 @@ const (
 	pusherUrl = "ws://ws.pusherapp.com:80/app/%s?protocol=7"
 )
 
-type Client struct {
+type Connection struct {
 	key      string
 	conn     *websocket.Conn
 	channels []*Channel
 }
 
-func New(key string) (*Client, error) {
+func New(key string) (*Connection, error) {
 	ws, err := websocket.Dial(fmt.Sprintf(pusherUrl, key), "", "http://localhost/")
 	if err != nil {
 		return nil, err
 	}
 
-	client := &Client{
+	connection := &Connection{
 		key:  key,
 		conn: ws,
 		channels: []*Channel{
@@ -31,13 +31,13 @@ func New(key string) (*Client, error) {
 		},
 	}
 
-	go client.pong()
-	go client.poll()
+	go connection.pong()
+	go connection.poll()
 
-	return client, nil
+	return connection, nil
 }
 
-func (c *Client) pong() {
+func (c *Connection) pong() {
 	tick := time.Tick(time.Minute)
 	pong := NewPongMessage()
 	for {
@@ -46,7 +46,7 @@ func (c *Client) pong() {
 	}
 }
 
-func (c *Client) poll() {
+func (c *Connection) poll() {
 	for {
 		var msg Message
 		err := websocket.JSON.Receive(c.conn, &msg)
@@ -58,7 +58,7 @@ func (c *Client) poll() {
 	}
 }
 
-func (c *Client) processMessage(msg *Message) {
+func (c *Connection) processMessage(msg *Message) {
 	for _, channel := range c.channels {
 		if channel.Name == msg.Channel {
 			channel.processMessage(msg)
@@ -66,11 +66,11 @@ func (c *Client) processMessage(msg *Message) {
 	}
 }
 
-func (c *Client) Disconnect() error {
+func (c *Connection) Disconnect() error {
 	return c.conn.Close()
 }
 
-func (c *Client) Channel(name string) *Channel {
+func (c *Connection) Channel(name string) *Channel {
 	for _, channel := range c.channels {
 		if channel.Name == name {
 			return channel
