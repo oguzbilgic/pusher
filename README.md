@@ -23,7 +23,7 @@ func main() {
 	for {
 		msg := <-messages
 
-		println(msg)
+		println(msg.(string))
 	}
 }
 ```
