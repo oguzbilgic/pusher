@@ -17,13 +17,13 @@ func main() {
 		panic(err)
 	}
 
-	chatRoomChan := pusher.Channel("chat_room")
-	messages := tradeChan.Bind("new_message")
+	chatRoomChan := conn.Channel("chat_room")
+	messages := chatRoomChan.Bind("new_message")
 
 	for {
 		msg := <-messages
 
-		println(msg.Data.(String))
+		println(msg)
 	}
 }
 ```
