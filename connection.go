@@ -2,9 +2,10 @@
 package pusher
 
 import (
-	"golang.org/x/net/websocket"
 	"fmt"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
 const (
@@ -18,7 +19,12 @@ type Connection struct {
 }
 
 func New(key string) (*Connection, error) {
-	ws, err := websocket.Dial(fmt.Sprintf(pusherUrl, key), "", "http://localhost/")
+	return NewFromKeyAndUrl(key, pusherUrl)
+}
+
+func NewFromKeyAndUrl(key string, keylessUrl string) (*Connection, error) {
+	ws, err := websocket.Dial(
+		fmt.Sprintf(keylessUrl, key), "", "http://localhost/")
 	if err != nil {
 		return nil, err
 	}
